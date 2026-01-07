@@ -1,1 +1,9 @@
-<Solution />
+<Solution>
+  <Project Path="OrderDemo.AppHost/OrderDemo.AppHost.csproj" Id="e3fd7756-ee7f-43e9-bc76-ce10313b2a21" />
+  <Project Path="OrderDemo.ServiceDefaults/OrderDemo.ServiceDefaults.csproj" />
+  <Project Path="Ordering.Api/Ordering.Api.csproj" Id="3b09b9d7-89d3-40c2-b65f-979bafd8aa39" />
+  <Project Path="Ordering.Application/Ordering.Application.csproj" Id="0783db59-aacc-4998-a2e4-c7cc76c6ffca" />
+  <Project Path="Ordering.Blazor/Ordering.Blazor.csproj" Id="0438c242-b96b-4894-9112-23627600bda3" />
+  <Project Path="Ordering.Domain/Ordering.Domain.csproj" Id="5e1fe7fd-893d-438e-93cf-816a5de00f82" />
+  <Project Path="Ordering.Infrastructure/Ordering.Infrastructure.csproj" Id="b2cab4da-20d5-464e-8e05-6336ba01e220" />
+</Solution>
