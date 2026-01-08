@@ -1,10 +1,9 @@
 var builder = DistributedApplication.CreateBuilder(args);
 
-var postgres = builder.AddPostgres("postgres");
-var orderingDatabase = postgres.AddDatabase("orderingdb");
+var postgres = builder.AddPostgres("postgres").AddDatabase("orderingdb");
 
-builder.AddProject<Projects.Ordering_Api>("ordering-api").WithReference(postgres).WaitFor(orderingDatabase);
+var api = builder.AddProject<Projects.Ordering_Api>("ordering-api").WithReference(postgres).WaitFor(postgres);
 
-builder.AddProject<Projects.Ordering_Blazor>("ordering-blazor");
+builder.AddProject<Projects.Ordering_Blazor>("ordering-blazor").WithReference(api);
 
 builder.Build().Run();

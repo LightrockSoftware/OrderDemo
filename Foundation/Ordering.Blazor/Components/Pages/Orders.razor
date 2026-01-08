@@ -1,0 +1,92 @@
+﻿@page "/orders"
+@using Ordering.Application.Dtos
+@inject IHttpClientFactory HttpClientFactory
+
+<h3>Order Demo</h3>
+
+<div class="mb-3">
+    <button class="btn btn-primary me-2"  @onclick="SeedData">
+        Seed Demo Data
+    </button>
+
+    <button class="btn btn-secondary" @onclick="LoadOrders">
+        Load Orders
+    </button>
+</div>
+
+@if (_loading)
+{
+
+    <p>Loading...</p>
+}
+else if (_orders.Any())
+{
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Order Id</th>
+                <th>Created</th>
+                <th>Status</th>
+                <th>Customer</th>
+                <th>Items</th>
+                <th>Total</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var order in _orders)
+            {
+                <tr>
+                    <td>@order.Id</td>
+                    <td>@order.CreatedUtc.ToString("u")</td>
+                    <td>@order.Status</td>
+                    <td>@order.Customer</td>
+                    <td>@order.ItemCount</td>
+                    <td>@order.Total.ToString("C")</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private readonly List<OrderSummaryDto> _orders = new();
+    private bool _loading;
+
+
+    private Guid _tenantId = Guid.Empty;
+
+    private async Task SeedData()
+    {
+        var client = HttpClientFactory.CreateClient("OrderingApi");
+
+        await client.PostAsync("/seed", null);
+
+        _tenantId = await LoadTenantId(client);
+    }
+
+    private async Task LoadOrders()
+    {
+        if (_tenantId == Guid.Empty)
+            return;
+
+        _loading = true;
+        _orders.Clear();
+
+        var client = HttpClientFactory.CreateClient("OrderingApi");
+
+        var orders = await client.GetFromJsonAsync<List<OrderSummaryDto>>(
+            $"/tenants/{_tenantId}/orders");
+
+        if (orders is not null)
+            _orders.AddRange(orders);
+
+        _loading = false;
+    }
+
+    private async Task<Guid> LoadTenantId(HttpClient client)
+    {
+       
+        var tenantId = await client.GetFromJsonAsync<Guid>("/tenants/demo");
+        return tenantId;
+    }
+}

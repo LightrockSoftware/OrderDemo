@@ -1,5 +1,7 @@
 using Microsoft.EntityFrameworkCore;
+using Ordering.Application.Dtos;
 using Ordering.Infrastructure;
+using System.Net.NetworkInformation;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -10,8 +12,12 @@ builder.AddServiceDefaults();
 builder.Services.AddOpenApi();
 
 // Registers DbContext + pooling + health checks + telemetry using Aspire integration.
-builder.Services.AddNpgsql<OrderingDbContext>("orderingdb");
-// "orderingdb" must match the database name you used in AppHost.AddDatabase("orderingdb")
+builder.Services.AddDbContext<OrderingDbContext>(options =>
+{
+    var cs = builder.Configuration.GetConnectionString("orderingdb");
+    options.UseNpgsql(cs, npgoptions => npgoptions.MigrationsHistoryTable("__EFMigrationsHistory", "ordering"));
+});
+
 
 builder.Services.AddEndpointsApiExplorer();
 
@@ -56,18 +62,21 @@ app.MapGet("/tenants/{tenantId:guid}/orders", async (Guid tenantId, OrderingDbCo
     // This query will become VERY relevant in later posts (expression trees + translation).
     var orders = await db.Orders
         .Where(o => o.Customer.TenantId == tenantId)
-        .Select(o => new
-        {
-            o.Id,
-            o.CreatedUtc,
-            o.Status,
-            Customer = o.Customer.Name,
-            ItemCount = o.Items.Count,
-            Total = o.Items.Sum(i => i.Quantity * i.UnitPrice)
-        })
+        .Select(OrderSummaryDto.Projection)
         .ToListAsync();
 
     return Results.Ok(orders);
+});
+
+app.MapGet("/tenants/demo", async (OrderingDbContext db) =>
+{
+    var tenantId = await db.Tenants
+        .Select(t => t.Id)
+        .FirstOrDefaultAsync();
+
+    return tenantId == Guid.Empty
+        ? Results.NotFound()
+        : Results.Ok(tenantId);
 });
 
 

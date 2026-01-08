@@ -4,6 +4,12 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.AddServiceDefaults();
 
+// The API name must match what you registered in the AppHost
+builder.Services.AddHttpClient("OrderingApi", client =>
+{
+    client.BaseAddress = new Uri("https://ordering-api");
+});
+
 // Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();

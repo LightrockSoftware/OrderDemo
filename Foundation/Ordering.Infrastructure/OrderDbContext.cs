@@ -14,6 +14,8 @@ public sealed class OrderingDbContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.HasDefaultSchema("ordering");        
+
         modelBuilder.Entity<Tenant>()
             .HasKey(x => x.Id);
 
@@ -40,5 +42,9 @@ public sealed class OrderingDbContext : DbContext
             .HasOne(x => x.Order)
             .WithMany(o => o.Items)
             .HasForeignKey(x => x.OrderId);
+
+        base.OnModelCreating(modelBuilder);
     }
+
+
 }
